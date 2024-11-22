@@ -1,5 +1,6 @@
 pipeline {
     agent any
+    
     tools {
         maven 'Maven 3.8.1'
     }
@@ -13,6 +14,21 @@ pipeline {
                     // Defining a build timestamp variable
                     env.BUILD_TIMESTAMP = new Date().format("yyyyMMddHHmmss", TimeZone.getTimeZone('UTC'))
                     echo "Build timestamp: ${env.BUILD_TIMESTAMP}"
+                }
+            }
+        }
+
+        stage('Prepare Buildx') {
+            steps {
+                script {
+                    // Install and enable Docker Buildx
+                    sh """
+                        mkdir -p ~/.docker/cli-plugins
+                        curl -SL https://github.com/docker/buildx/releases/latest/download/buildx-linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
+                        chmod +x ~/.docker/cli-plugins/docker-buildx
+                        docker buildx version
+                        docker buildx create --use
+                    """
                 }
             }
         }
@@ -34,9 +50,6 @@ pipeline {
                             echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
                         """
                     }
-
-                    // Initialize Docker Buildx
-                    sh 'docker buildx create --use'
 
                     // Building Docker image for multiple platforms using Buildx
                     def imageName = "rnandaku30/studentsapp:${env.BUILD_TIMESTAMP}"
