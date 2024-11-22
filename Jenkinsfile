@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven3.8.1'
+        maven 'Maven 3.8.1'
     }
     environment {
         DOCKERHUB_CREDENTIALS = credentials('rams-docker-pass') // Docker credentials added to Jenkins
