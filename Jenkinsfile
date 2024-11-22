@@ -4,7 +4,7 @@ pipeline {
         maven 'Maven3.9.9'
     }
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('docker-pass') // Docker credentials added to Jenkins
+        DOCKERHUB_CREDENTIALS = credentials('rams-docker-pass') // Docker credentials added to Jenkins
     }
     stages {
         stage('Initialize') {
@@ -27,7 +27,7 @@ pipeline {
                     sh 'mvn clean package'
 
                     // Securely handling Docker login
-                    withCredentials([usernamePassword(credentialsId: 'docker-pass',
+                    withCredentials([usernamePassword(credentialsId: 'rams-docker-pass',
                                                       usernameVariable: 'DOCKER_USER',
                                                       passwordVariable: 'DOCKER_PASS')]) {
                         sh """
