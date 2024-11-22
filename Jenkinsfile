@@ -1,11 +1,10 @@
 pipeline {
     agent any
-    
     tools {
         maven 'Maven 3.8.1'
     }
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('rams-docker-pass') // Docker credentials added to Jenkins
+        DOCKERHUB_CREDENTIALS = credentials('rams-docker-pass') // Docker credentials added to Jenkins and names the set as docker-pass
     }
     stages {
         stage('Initialize') {
@@ -18,20 +17,6 @@ pipeline {
             }
         }
 
-        stage('Prepare Buildx') {
-            steps {
-                script {
-                    // Install and enable Docker Buildx
-                    sh """
-                        mkdir -p ~/.docker/cli-plugins
-                        curl -SL https://github.com/docker/buildx/releases/latest/download/buildx-linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
-                        chmod +x ~/.docker/cli-plugins/docker-buildx
-                        docker buildx version
-                        docker buildx create --use
-                    """
-                }
-            }
-        }
 
         stage('Building the Application Image') {
             steps {
@@ -42,6 +27,7 @@ pipeline {
                     // Change directory to 'demo' for Maven build
                     sh 'mvn clean package'
 
+
                     // Securely handling Docker login
                     withCredentials([usernamePassword(credentialsId: 'rams-docker-pass',
                                                       usernameVariable: 'DOCKER_USER',
@@ -51,12 +37,22 @@ pipeline {
                         """
                     }
 
-                    // Building Docker image for multiple platforms using Buildx
+                    // Building Docker image using the BUILD_TIMESTAMP
                     def imageName = "rnandaku30/studentsapp:${env.BUILD_TIMESTAMP}"
-                    sh "docker buildx build --platform linux/amd64,linux/arm64 -t ${imageName} --push ."
+                    sh "docker build -t ${imageName} ."
 
-                    // Save image name for later stages
+                    // Saving image name for later stages
                     env.IMAGE_NAME = imageName
+                }
+            }
+        }
+
+
+        stage('Pushing Image to DockerHub') {
+            steps {
+                script {
+                    // Pushing the Docker image to DockerHub
+                    sh "docker push ${env.IMAGE_NAME}"
                 }
             }
         }
