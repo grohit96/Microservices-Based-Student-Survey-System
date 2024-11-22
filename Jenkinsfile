@@ -61,7 +61,7 @@ pipeline {
             steps {
                 script {
                     // Deploying the new image to Rancher
-                    sh "kubectl set image deployment/hw3-deployment container-0=${env.IMAGE_NAME}"
+                    sh "kubectl -n dev set image deployment/hw3-deployment container-0=${env.IMAGE_NAME}"
                 }
             }
         }
