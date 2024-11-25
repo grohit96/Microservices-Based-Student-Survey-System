@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/surveys")
+@RequestMapping("/api/surveys/change")
 public class SurveyController {
 
     @Autowired
